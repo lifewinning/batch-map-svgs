@@ -18,8 +18,9 @@ document.querySelector("#geo").addEventListener("change", function() {
   await asyncForEach(obj.features, async (o) => {
     params(o) //sets width, height, projection scaling for map
     arr = [] //need this later
-    await append(await o, await tileArray(await tileBaseMap(o),arr)) //generate map tiles and add them to map svg
-    await outline(obj.features,o) //add outline of specific location to the map
+    await singleTile(o, await tileBaseMap(o))
+    //await append(await o, await tileArray(await tileBaseMap(o),arr)) //generate map tiles and add them to map svg
+    //await outline(obj.features,o) //add outline of specific location to the map
   })	
   console.log('Done')
 }
@@ -65,28 +66,110 @@ function tileBaseMap(e){
 	return t;
 }
 
+function singleTile(e, t){
+	var layers =  ['water','landuse', 'roads']
+	layers.forEach(function(l){
+		t.forEach(function(ti){
+			div = d3.select(`#${e.thisID}`)
+			.append("g").attr("class", `tile-${ti.x}-${ti.y}-${ti.z}`)
+			for (let [k,v] of Object.entries(ti.data)){
+				if (l == k){
+				g = d3.select(`.tile-${ti.x}-${ti.y}-${ti.z}`).append("g")
+				.attr("class", `${k}`)
+				.attr("id", `${k}-${ti.x}-${ti.y}-${ti.z}`)
+				d3.select(`#${k}-${ti.x}-${ti.y}-${ti.z}`).selectAll("path")
+					.data(v.features.sort(function(a, b) { return a.properties.sort_rank ? a.properties.sort_rank - b.properties.sort_rank : 0 }))
+					//.data(v.features)
+					.enter()
+					.append("path")
+					.attr("d", e.path)
+					.attr("class", function(m){
+					  return m.properties.kind
+					  // if (v.features.properties.sort_rank){console.log(k, v.features.properties.kind,v.features.properties.sort_rank)}
+					})
+					//   .attr("id", function(m){
+					//   	for (var i = m.features.length - 1; i >= 0; i--) {
+					//   		return m.features[i].properties.kind
+					//   	}
+					//   })
+					.exit()	
+
+				} else{
+					console.log("nah", k)
+				}
+			}
+		return div; })
+	})
+	// t.forEach(function(ti){
+	// 	div = d3.select(`#${e.thisID}`)
+	// 	.append("g").attr("class", `tile-${ti.x}-${ti.y}-${ti.z}`)
+	// 	for (let [k, v] of Object.entries(ti.data)){
+	// 		if (layers.includes(k)){
+	// 			g = d3.select(`.tile-${ti.x}-${ti.y}-${ti.z}`).append("g")
+	// 			.attr("class", `${k}`)
+	// 			.attr("id", `${k}-${ti.x}-${ti.y}-${ti.z}`)
+	// 			d3.select(`#${k}-${ti.x}-${ti.y}-${ti.z}`).selectAll("path")
+	// 				.data(v.features.sort(function(a, b) { return a.properties.sort_rank ? a.properties.sort_rank - b.properties.sort_rank : 0 }))
+	// 				//.data(v.features)
+	// 				.enter()
+	// 				.append("path")
+	// 				.attr("d", e.path)
+	// 				.attr("class", function(m){
+	// 				  return m.properties.kind
+	// 				  // if (v.features.properties.sort_rank){console.log(k, v.features.properties.kind,v.features.properties.sort_rank)}
+	// 				})
+	// 				//   .attr("id", function(m){
+	// 				//   	for (var i = m.features.length - 1; i >= 0; i--) {
+	// 				//   		return m.features[i].properties.kind
+	// 				//   	}
+	// 				//   })
+	// 				.exit()
+	// 			}
+	// 		}
+	// 	return div;
+	// })
+}
+
 function tileArray(t,arr){
- for (let [k,v] of Object.entries(t[0].data)){
-  //console.log(k,v)
-  let obj = {}
-  obj[k] = t.map(ti => ti.data[k])
-  arr.push(obj)
-  //console.log(arr)
+ var layers = ['water','landuse','roads']
+ layers.forEach(function(l){
+ 	for (let [k,v] of Object.entries(t[0].data)){
+ 		if (l == k){
+ 			let obj = {}
+  			obj[k] = t.map(ti => ti.data[k])
+  			arr.push(obj)
+  		}
  }
+})
+ console.log(arr)
+ // for (let [k,v] of Object.entries(t[0].data)){
+ //  //console.log(k,v)
+ //  console.log(k)
+ //  let obj = {}
+ //  obj[k] = t.map(ti => ti.data[k])
+ //  arr.push(obj)
+  //console.log(arr)
  //arr.push({"coastlines": t.filter(d => d.data.water != d.data.boundary)})
  return arr;
 }
 
 function append(e,arr){ 
 	//TODO: coastline/land shaping stuff, figuring out order for appending different layers
-	//TODO: merging paths to save myself some serious headache later
+	//TODO: merging paths to save myself some serious headache later]
 	arr.forEach(function(l){
 		for (let [k, v] of Object.entries(l)) {
 				  return d3.select(`#${e.thisID}`)
 				  .append("g").attr("class",k)
+				  .attr("id",k)
 				  .selectAll("path").data(v).enter()
 				  .append("path").attr("d",e.path)
 				  .attr("class", function(m){
+				  	for (var i = m.features.length - 1; i >= 0; i--) {
+				  		return m.features[i].properties.kind
+				  		console.log(m.features[i].properties)
+				  	}
+				  })
+				  .attr("id", function(m){
 				  	for (var i = m.features.length - 1; i >= 0; i--) {
 				  		return m.features[i].properties.kind
 				  	}
@@ -100,9 +183,38 @@ function outline(obj,e){
 	d3.select(`#${e.thisID}`).append("g").attr("class","site").attr("id","site").selectAll("path").data(obj).enter().append("path").attr("d",e.path).exit()
 }
 
-map = `<svg viewBox="0 0 ${width} ${height}" style="width:100%;height:auto;">${tiles.map(d => `
-  <path fill="#eee" d="${path(filter(d.data.water, d => !d.properties.boundary))}"></path>
-  <path fill="none" stroke="#aaa" d="${path(filter(d.data.water, d => d.properties.boundary))}"></path>
-  <path fill="none" stroke="#000" stroke-width="0.75" d="${path(d.data.roads)}"></path>
-`)}
-</svg>`
+// var layers = [
+//     { layer: 'boundaries',
+//       display: false,
+//       types: []} ,
+//     { layer: 'buildings',
+//       display: false,
+//       types: []} ,
+//     { layer: 'earth',
+//       display: false,
+//       types: []} ,
+//     { layer: 'landuse',
+//       display: false,
+//       types: []} ,
+//     { layer: 'places',
+//       display: false,
+//       types: []} ,
+//     { layer: 'pois',
+//       display: false,
+//       types: []} ,
+//     { layer: 'roads',
+//       display: true,
+//       types: []} ,
+//     { layer: 'transit',
+//       display: false,
+//       types: []} ,
+//     { layer: 'water',
+//       display: true,
+//       types: []}
+//     ];
+// map = `<svg viewBox="0 0 ${width} ${height}" style="width:100%;height:auto;">${tiles.map(d => `
+//   <path fill="#eee" d="${path(filter(d.data.water, d => !d.properties.boundary))}"></path>
+//   <path fill="none" stroke="#aaa" d="${path(filter(d.data.water, d => d.properties.boundary))}"></path>
+//   <path fill="none" stroke="#000" stroke-width="0.75" d="${path(d.data.roads)}"></path>
+// `)}
+// </svg>`

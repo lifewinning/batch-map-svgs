@@ -1,5 +1,5 @@
 svg{
-	fill:#9DD9D2;
+	/*fill:#9DD9D2;*/
 }
 .site{
 	fill:none;
@@ -23,29 +23,35 @@ svg{
 	display: none;
 }
 .boundaries{
-	/*fill:papayawhip;*/
+	display:none;
 }
 .roads{
-	stroke: #ccc;
+	stroke: white;
 	stroke-width: 1px;
 	fill:none;
 }
 .earth{
-	fill:#dacdbe;
-	stroke: 0.5;
-	stroke-color: #dfe6ea;
+	fill:papayawhip;
+	/*stroke: 0.5;
+	stroke-color: #dfe6ea;*/
 }
 .landuse{
-	display: none;
+	fill:white;
 }
-.water-layer,  .river, .stream, .canal { fill: none; stroke: #9DD9D2; stroke-width: 1.5px; }
+.military{
+	fill: pink;
+	fill-opacity: 0.2;
+}
+.water,  .river, .stream, .canal { fill: none; stroke: #9DD9D2; stroke-width: 1.5px; }
 .water, .ocean { fill: #9DD9D2; }
 .riverbank { fill: #9DD9D2; }
-.water_boundary, .ocean_boundary,.riverbank_boundary { fill: none; stroke: #93cbc4; stroke-width: 0.5px; }
+.boundary, .boundary,.boundary { fill: none; stroke: #93cbc4; stroke-width: 0.5px; }
+.locality{display:none;}
 .major_road { stroke: #fb7b7a; stroke-width: 1px; }
 .minor_road { stroke: #999; stroke-width: 0.5px; }
 .highway { stroke: #FA4A48; stroke-width: 1.5px; }
 .buildings-layer { stroke: #987284; stroke-width: 0.15px; }
-.park, .tile .nature_reserve, .tile .wood, .tile .protected_land { fill: #88D18A; stroke: #88D18A; stroke-width: 0.5px; }
-.pier { fill: #fff; stroke: #fff; stroke-width: 0.5px; }
+.park, .nature_reserve, .wood, .protected_land, .meadow, .wetland { fill: #88D18A; stroke: #88D18A; stroke-width: 0.5px; }
+.pier { fill: lavender; stroke: #fff; stroke-width: 0.5px; }
+.port {fill: lavender;}
 .rail { stroke: #503D3F; stroke-width: 0.5px; }
