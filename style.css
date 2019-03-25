@@ -2,8 +2,10 @@ svg{
 	/*fill:#9DD9D2;*/
 }
 .site{
-	fill:none;
-	stroke:red;
+	fill:cyan;
+	fill-opacity: 0.3;
+	stroke:cyan;
+	stroke-width: 3px;
 }
 .water{
 	fill:#9DD9D2;
@@ -11,47 +13,52 @@ svg{
 .buildings{
 	fill:gray;
 }
-.places{
+#places, .places{
 	display: none;
 
 }
-.transit{
+#transit{
 	display: none;
 
 }
-.pois{
+#pois{
 	display: none;
 }
-.boundaries{
-	display:none;
+#boundaries{
+	fill: none; stroke: #93cbc4; stroke-width: 0.5px;
 }
-.roads{
+#roads{
 	stroke: white;
 	stroke-width: 1px;
 	fill:none;
 }
-.earth{
+#earth, .earth{
 	fill:papayawhip;
 	/*stroke: 0.5;
 	stroke-color: #dfe6ea;*/
 }
-.landuse{
+#landuse{
 	fill:white;
 }
 .military{
 	fill: pink;
 	fill-opacity: 0.2;
 }
-.water,  .river, .stream, .canal { fill: none; stroke: #9DD9D2; stroke-width: 1.5px; }
-.water, .ocean { fill: #9DD9D2; }
-.riverbank { fill: #9DD9D2; }
-.boundary, .boundary,.boundary { fill: none; stroke: #93cbc4; stroke-width: 0.5px; }
-.locality{display:none;}
-.major_road { stroke: #fb7b7a; stroke-width: 1px; }
-.minor_road { stroke: #999; stroke-width: 0.5px; }
-.highway { stroke: #FA4A48; stroke-width: 1.5px; }
-.buildings-layer { stroke: #987284; stroke-width: 0.15px; }
-.park, .nature_reserve, .wood, .protected_land, .meadow, .wetland { fill: #88D18A; stroke: #88D18A; stroke-width: 0.5px; }
-.pier { fill: lavender; stroke: #fff; stroke-width: 0.5px; }
-.port {fill: lavender;}
-.rail { stroke: #503D3F; stroke-width: 0.5px; }
+.tile path {
+  fill: none;
+  stroke: #fff;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.tile .water-layer, .tile .river, .tile .stream, .tile .canal { fill: none; stroke: #9DD9D2; stroke-width: 1.5px; }
+.tile .water, .tile .ocean { fill: #9DD9D2; stroke:none;}
+.tile .riverbank { fill: #9DD9D2; }
+.tile .water_boundary, .tile .ocean_boundary, .tile .riverbank_boundary { fill: none; stroke: #93cbc4; stroke-width: 0.5px; }
+.tile .major_road { stroke: #fb7b7a; stroke-width: 1px; }
+.tile .minor_road { stroke: #999; stroke-width: 0.5px; }
+.tile .highway { stroke: #FA4A48; stroke-width: 1.5px; }
+.tile .buildings-layer { stroke: #987284; stroke-width: 0.15px; }
+.tile .park, .tile .nature_reserve, .tile .wood, .tile .protected_land { fill: #88D18A; stroke: #88D18A; stroke-width: 0.5px; }
+.tile .pier { fill: #fff; stroke: #fff; stroke-width: 0.5px; }
+.tile .rail { stroke: #503D3F; stroke-width: 0.5px; }
