@@ -20,7 +20,7 @@ document.querySelector("#geo").addEventListener("change", function() {
     params(o) //sets width, height, projection scaling for map
     //console.log(await tileBaseMap(o))
     let tiles = await tileBaseMap(o)
-    console.log(tiles)
+    //console.log(tiles)
     // let dt = await zenData(tiles,o)
     // console.log(dt)
    	//let arr = await zenArray(tiles)
@@ -31,7 +31,6 @@ document.querySelector("#geo").addEventListener("change", function() {
   })	
   console.log('you made some maps')
 }
-
 start()
 };
 
@@ -121,7 +120,6 @@ function zenArray(t){
 function makeZenTile(ti,e){
 	ti.forEach(function(t){
 		let arr = zenArray(t)
-		//console.log(t.x,t.y,t.z)
 		div = d3.select(`#${e.thisID}`).append("g").attr("id",`tile-${t.x}-${t.y}-${t.z}`).attr("class","tile");
 		d3.select(`#tile-${t.x}-${t.y}-${t.z}`).selectAll("path")
 		.data(arr.sort(function(a, b) { return a.properties.sort_rank ? a.properties.sort_rank - b.properties.sort_rank : 0 }))
@@ -191,32 +189,3 @@ function topoZenTile(arr,ti,e){
       	.attr("d", e.path)
       	.exit();
 }
-
-//this one is going to kill me tho
-// e.zoom = d3.behavior.zoom()
-// 	.scale(e.projscale * 2 * Math.PI)
-// 	.scaleExtent([1 << 8, 1 << 26])
-// 	.translate(projection([e.]))
-// 	.translate(zoom.translate([e.centroid.geometry.coordinates])).map(function(x){return -x});
-//     .on("zoom", zoomies)
-
-// function zoomies(){
-// 	z = {}
-// 	z.tiles = d3.tile()
-// 	  .size
-//       .scale(zoom.scale())
-//       .translate(zoom.translate())
-
-//   	z.projection =
-//       this.projection.scale(zoom.scale() / 2 / Math.PI)
-
-//     z.projscale = z.projection.scale()
-//     //??
-//     z.thisID = this.id
-//     svg = d3.select(this).selectAll('.tile').each(remove);
-
-//     tiles = tileBaseMap(z)
-//    	sorted = zenArray(tiles,z)
-//     makeZenTile(sorted,tiles,z)
-
-// }
