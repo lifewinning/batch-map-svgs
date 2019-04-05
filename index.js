@@ -17,15 +17,8 @@ document.querySelector("#geo").addEventListener("change", function() {
 
   const start = async () => {
   await asyncForEach(obj.features, async (o) => {
-    params(o) //sets width, height, projection scaling for map
-    //console.log(await tileBaseMap(o))
+    params(o)
     let tiles = await tileBaseMap(o)
-    //console.log(tiles)
-    // let dt = await zenData(tiles,o)
-    // console.log(dt)
-   	//let arr = await zenArray(tiles)
-   	//console.log(arr)
-    // console.log(sorted)
     await makeZenTile(tiles,o)
     await outline(obj.features,o)
   })	
@@ -52,7 +45,64 @@ function params(e){
 	e.thisID = e.properties.city.replace(' ', '').replace(',','').replace(' ','')
 	e.path = d3.geoPath().projection(e.projection)
 
+	//not ideal method but gets the job done–gets zoom level of default view and returns the corresponding scale
+	e.getZoom = function(){
+		let tile = d3.tile()
+		.size([e.width, e.height])
+		.scale(e.projscale*(2* Math.PI))
+		.translate(e.projection([0, 0]))
+
+		return 1 << (8+tile()[0].z)
+	}
+	
+	zoom = d3.zoom()
+    	.scaleExtent([1 << 8, 1 << 21])
+		.on("zoom", zoomies)
+	
 	e.svg = d3.select("#maps").append('svg').attr('class','map').attr('height',e.height).attr('width',e.width).attr('id', e.thisID)
+		.call(zoom)
+		.call(zoom.transform, d3.zoomIdentity
+		//.translate(e.width/2,e.height/2) //if I do this the zoom starts centered but then does this translate again when zoom is fired?
+  		.scale(e.getZoom())
+  		)
+	tiles = e.svg.append('g').attr('id',`${e.thisID}-tiles`)
+	function zoomies(){
+		let tiles = d3.tile()
+			.size([e.width,e.height])
+			.scale(d3.event.transform.k)
+			.translate(e.projection([0,0])) 
+			//.translate([d3.event.transform.x,d3.event.transform.y]);
+		
+		d3.selectAll(`${e.thisID}-tile`).remove()
+
+		e.projection
+	      .scale(d3.event.transform.k / (2*Math.PI))
+	      .translate([d3.event.transform.x, d3.event.transform.y]);
+
+		d3.select(`#site`)
+			.attr("transform",`translate(${d3.event.transform.x}, ${d3.event.transform.y}) scale(${d3.event.transform.k/(e.getZoom())})`)
+			.style("stroke-width", 1 / (d3.event.transform.k/e.getZoom()))
+
+		//this is very slow and I hate it
+
+		let t = Promise.all(tiles().map(async d => {
+			d.data = await d3.json(`https://tile.nextzen.org/tilezen/vector/v1/256/all/${d.z}/${d.x}/${d.y}.json?api_key=ztkh_UPOQRyakWKMjH_Bzg`); 
+			return d;}))
+
+		 t.then(function(ti){
+		 	ti.forEach(function(tile){
+		 		arr = zenArray(tile)
+		 		d3.select(`${e.thisID}-tiles`).append('g')
+		 		.attr("id",`tile-${tile.x}-${tile.y}-${tile.z}`).attr("class",`${e.thisID}-tile`)
+		 		.selectAll('path')
+		 		.data(arr.sort(function(a, b) { return a.properties.sort_rank ? a.properties.sort_rank - b.properties.sort_rank : 0 }))
+				.enter().append("path")
+		      	.attr("d", e.path)
+		      	.attr("class", function(d) { var kind = d.properties.kind || ''; if(d.properties.boundary){kind += '_boundary';} return kind; })
+		      	.exit();
+				})
+		 })
+	} 
 	return e;
 }
 	
@@ -120,7 +170,7 @@ function zenArray(t){
 function makeZenTile(ti,e){
 	ti.forEach(function(t){
 		let arr = zenArray(t)
-		div = d3.select(`#${e.thisID}`).append("g").attr("id",`tile-${t.x}-${t.y}-${t.z}`).attr("class","tile");
+		div = d3.select(`${e.thisID}-tiles`).append("g").attr("id",`tile-${t.x}-${t.y}-${t.z}`).attr("class",`${e.thisID}-tile`);
 		d3.select(`#tile-${t.x}-${t.y}-${t.z}`).selectAll("path")
 		.data(arr.sort(function(a, b) { return a.properties.sort_rank ? a.properties.sort_rank - b.properties.sort_rank : 0 }))
 		.enter().append("path")
