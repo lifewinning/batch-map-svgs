@@ -24,7 +24,6 @@ function params(obj, e){
 	e.width = window.innerWidth;
 	e.height = window.innerHeight;
 	e.centroid = turf.centroid(e.geometry)
-	//console.log(centroid)
 	e.projection = d3.geoMercator()
 		.translate([e.width/2, e.height/2])
 		.center(e.centroid.geometry.coordinates)
@@ -35,7 +34,7 @@ function params(obj, e){
 	e.thisID = e.properties.city.replace(' ', '').replace(',','').replace(' ','')
 	e.path = d3.geoPath().projection(e.projection)
 
-	//not ideal method but gets the job done–gets zoom level of default view and returns the corresponding scale
+	//gets zoom level of default view and returns the corresponding scale
 	e.getZoom = function(){
 		let tile = d3.tile()
 		.size([e.width, e.height])
@@ -53,11 +52,12 @@ function params(obj, e){
 	e.svg = d3.select("#maps").append('svg').attr('class','map').attr('height',e.height).attr('width',e.width).attr('id', e.thisID)
 		.call(zoom)
 		.call(zoom.transform, d3.zoomIdentity
-		//.translate(e.width/2,e.height/2) //if I do this the zoom starts centered but then does this translate again when zoom is fired?
+		.translate(e.width/2,e.height/2) //this kind of fucks everything up sorry
   		.scale(e.getZoom())
   		)
+
 	tiles = e.svg.append('g').attr('id','tiles')
-	
+
 	outline(obj, e)
 
 	function drawTiles(){
@@ -65,10 +65,8 @@ function params(obj, e){
 			.size([e.width,e.height])
 			.scale(d3.event.transform.k)
 			.translate(e.projection([0,0])) 
-			//.translate([d3.event.transform.x,d3.event.transform.y]);
-		
-		console.log(tiles())
-		//d3.selectAll('.tile').remove()
+
+		//a bunch of semi-tedious steps to check which tiles are already loaded, which ones we need, and which ones we can delete 
 
 		currentTiles = Array.from(document.querySelectorAll('.tile')).map(t => t.id.replace('tile-',''))
 
@@ -87,7 +85,6 @@ function params(obj, e){
 				getTiles.push(t)
 			}
 		})
-		console.log(checkTiles)
 
 		currentTiles.forEach(function(c){
 			needTile=checkTiles.includes(c)
@@ -159,37 +156,6 @@ function zenArray(t){
 }
 
 function outline(obj,e){
-	d3.select(`#${e.thisID}`).append("g").attr("class","site").attr("id","site")
-	//.attr("transform",`translate(${e.width/2}, ${e.height/2}) scale(0)`)
-	.selectAll("path").data(obj).enter().append("path").attr("d",e.path).exit()
+	d3.select(`#${e.thisID}`).append("g").attr("class","site").attr("id","site").selectAll("path").data(obj).enter().append("path").attr("d",e.path).exit()
 }
 
-function tileBaseMap(e){
-	let tile = d3.tile()
-		.size([e.width, e.height])
-		.scale(e.projscale*(2* Math.PI))
-		.translate(e.projection([0, 0]))
-		
-	//console.log(tile())
-	let t = Promise.all(tile().map(async d => {
-		d.data = await d3.json(`https://tile.nextzen.org/tilezen/vector/v1/256/all/${d.z}/${d.x}/${d.y}.json?api_key=ztkh_UPOQRyakWKMjH_Bzg`); 
-		return d;
-		})
-		)
-	return t;
-}
-
-
-function makeZenTile(ti,e){
-	ti.forEach(function(t){
-		let arr = zenArray(t)
-		div = d3.select('#tiles').append("g").attr("id",`tile-${t.x}-${t.y}-${t.z}`).attr("class","tile").selectAll("path")
-		.data(arr.sort(function(a, b) { return a.properties.sort_rank ? a.properties.sort_rank - b.properties.sort_rank : 0 }))
-		.enter().append("path")
-      	.attr("d", e.path)
-      	.attr("class", function(d) { var kind = d.properties.kind || ''; if(d.properties.boundary){kind += '_boundary';} return d.layer_name + '-layer ' + kind; })
-      	.exit();
-	})
-		
-	
-}
